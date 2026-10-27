@@ -12,6 +12,44 @@ liensMenu.forEach((lien) => {
         section?.scrollIntoView({ behavior: "smooth" });
     });
 });
+const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Remplit une barre de langue de 0 jusqu'à sa valeur
+function remplirBarre(barre) {
+    const valeurFinale = Number(barre.dataset.valeur);
+    const duree = 1000;
+    const debut = performance.now();
+    function etape(maintenant) {
+        const avancement = Math.min((maintenant - debut) / duree, 1);
+        barre.value = valeurFinale * avancement;
+        if (avancement < 1)
+            requestAnimationFrame(etape);
+    }
+    requestAnimationFrame(etape);
+}
+if (!mouvementReduit && "IntersectionObserver" in window) {
+    const sections = document.querySelectorAll("section");
+    const barres = document.querySelectorAll("#langues progress");
+    // On met les barres à 0 en gardant leur vraie valeur de côté
+    barres.forEach((barre) => {
+        barre.dataset.valeur = String(barre.value);
+        barre.value = 0;
+    });
+    // Quand une section arrive à l'écran, on l'affiche (une seule fois)
+    const observateur = new IntersectionObserver((entrees) => {
+        entrees.forEach((entree) => {
+            if (!entree.isIntersecting)
+                return;
+            entree.target.classList.add("visible");
+            if (entree.target.id === "langues")
+                barres.forEach(remplirBarre);
+            observateur.unobserve(entree.target);
+        });
+    }, { threshold: 0.15 });
+    sections.forEach((section) => {
+        section.classList.add("animer");
+        observateur.observe(section);
+    });
+}
 const formulaire = document.getElementById("form-contact");
 const champNom = document.getElementById("nom");
 const champPrenom = document.getElementById("prenom");
