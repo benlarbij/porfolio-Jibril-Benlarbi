@@ -173,6 +173,194 @@ header > :nth-child(4) { animation-delay: 0.45s; }
 header > :nth-child(5) { animation-delay: 0.6s; }
 header > :nth-child(6) { animation-delay: 0.75s; }
 
+html {
+  scroll-behavior: smooth;
+}
+
+/* En-tête plein écran avec dégradé animé et réseau de particules */
+header {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2a0849, #58139a, #7b2cbf, #3d0d6b);
+  background-size: 300% 300%;
+  animation: degrade 14s ease infinite;
+}
+
+@keyframes degrade {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+header canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+header > *:not(canvas) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Halo qui pulse autour de la photo */
+header img {
+  animation: apparition 0.6s ease both, halo 3s ease-in-out 0.6s infinite;
+}
+
+@keyframes halo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5); }
+  50%      { box-shadow: 0 0 0 14px rgba(255, 255, 255, 0); }
+}
+
+/* Curseur clignotant de l'effet machine à écrire */
+.sous-titre.ecrit::after {
+  content: "|";
+  margin-left: 2px;
+  animation: clignote 0.8s steps(1) infinite;
+}
+
+@keyframes clignote {
+  50% { opacity: 0; }
+}
+
+/* Flèche qui rebondit en bas de l'écran d'accueil */
+header .defiler {
+  position: absolute;
+  bottom: 30px;
+  left: calc(50% - 13px);
+  width: 26px;
+  height: 26px;
+  border-right: 3px solid white;
+  border-bottom: 3px solid white;
+  transform: rotate(45deg);
+  animation: fondu 0.6s ease 1s both, rebond 1.6s ease-in-out 1s infinite;
+}
+
+@keyframes fondu {
+  from { opacity: 0; }
+}
+
+section {
+  scroll-margin-top: 70px;
+}
+
+@keyframes rebond {
+  0%, 100% { transform: rotate(45deg) translate(0, 0); }
+  50%      { transform: rotate(45deg) translate(8px, 8px); }
+}
+
+/* Menu qui se fixe en haut une fois l'en-tête dépassé */
+header nav.nav-fixe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 12px 16px;
+  background: rgba(61, 13, 107, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: descente 0.35s ease both;
+}
+
+header nav.nav-fixe ul {
+  margin-top: 0;
+}
+
+header nav a.actif::after {
+  transform: scaleX(1);
+}
+
+@keyframes descente {
+  from { transform: translateY(-100%); }
+  to   { transform: none; }
+}
+
+/* Barre de progression de lecture */
+#progression {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  z-index: 101;
+  background: linear-gradient(90deg, #c77dff, #ffffff);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* Fiches projets en 3D qui suivent la souris, avec une lumière */
+#projets {
+  perspective: 1000px;
+}
+
+#projets article {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+#projets article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(123, 44, 191, 0.15), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+#projets article:hover::before {
+  opacity: 1;
+}
+
+/* Compétences en pastilles qui apparaissent une par une */
+#competences ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#competences li {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: #f1e6fb;
+  color: #58139a;
+  font-weight: bold;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+#competences li:hover {
+  transform: translateY(-3px) scale(1.05);
+  background: #58139a;
+  color: white;
+}
+
+#competences.visible li {
+  animation: pop 0.4s ease both;
+  animation-delay: calc(var(--i) * 80ms + 0.3s);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Pas d'animations pour ceux qui les ont désactivées sur leur appareil */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

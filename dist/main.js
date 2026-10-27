@@ -50,6 +50,171 @@ if (!mouvementReduit && "IntersectionObserver" in window) {
         observateur.observe(section);
     });
 }
+// Numéro de chaque compétence, pour qu'elles apparaissent l'une après l'autre
+document.querySelectorAll("#competences li").forEach((competence, i) => {
+    competence.style.setProperty("--i", String(i));
+});
+// Barre de progression de lecture en haut de la page
+const barreProgression = document.createElement("div");
+barreProgression.id = "progression";
+document.body.appendChild(barreProgression);
+function majProgression() {
+    const hauteurMax = document.documentElement.scrollHeight - window.innerHeight;
+    const avancement = hauteurMax > 0 ? window.scrollY / hauteurMax : 0;
+    barreProgression.style.transform = `scaleX(${avancement})`;
+}
+window.addEventListener("scroll", majProgression, { passive: true });
+majProgression();
+// Menu fixé en haut une fois l'en-tête dépassé + lien de la section en cours souligné
+const enTete = document.querySelector("header");
+const menu = document.querySelector("header nav");
+if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entrees) => {
+        menu.classList.toggle("nav-fixe", !entrees[0].isIntersecting);
+    }).observe(enTete);
+    const observateurMenu = new IntersectionObserver((entrees) => {
+        entrees.forEach((entree) => {
+            if (!entree.isIntersecting)
+                return;
+            liensMenu.forEach((lien) => {
+                lien.classList.toggle("actif", lien.getAttribute("href") === `#${entree.target.id}`);
+            });
+        });
+    }, { rootMargin: "-50% 0px -50% 0px" });
+    document.querySelectorAll("section").forEach((section) => observateurMenu.observe(section));
+}
+if (!mouvementReduit) {
+    // Effet machine à écrire sur le sous-titre
+    const sousTitre = document.querySelector(".sous-titre");
+    const phrases = [
+        sousTitre.textContent ?? "",
+        "Développeur C et TypeScript",
+        "À la recherche d'un stage en informatique",
+    ];
+    let indexPhrase = 0;
+    let nbLettres = phrases[0].length;
+    let efface = true;
+    sousTitre.classList.add("ecrit");
+    function ecrire() {
+        const phrase = phrases[indexPhrase];
+        sousTitre.textContent = phrase.slice(0, nbLettres);
+        let pause = efface ? 35 : 70;
+        if (!efface && nbLettres === phrase.length) {
+            efface = true;
+            pause = 2200;
+        }
+        else if (efface && nbLettres === 0) {
+            efface = false;
+            indexPhrase = (indexPhrase + 1) % phrases.length;
+            pause = 400;
+        }
+        else {
+            nbLettres += efface ? -1 : 1;
+        }
+        setTimeout(ecrire, pause);
+    }
+    setTimeout(ecrire, 3000);
+    // Fiches projets qui s'inclinent en 3D selon la position de la souris
+    document.querySelectorAll("#projets article").forEach((carte) => {
+        carte.addEventListener("mousemove", (event) => {
+            const rect = carte.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width;
+            const y = (event.clientY - rect.top) / rect.height;
+            carte.style.transform = `rotateX(${(0.5 - y) * 10}deg) rotateY(${(x - 0.5) * 10}deg) translateY(-4px)`;
+            carte.style.setProperty("--x", `${x * 100}%`);
+            carte.style.setProperty("--y", `${y * 100}%`);
+        });
+        carte.addEventListener("mouseleave", () => {
+            carte.style.transform = "";
+        });
+    });
+    // Réseau de particules dans l'en-tête, qui réagit à la souris
+    const canvas = document.createElement("canvas");
+    enTete.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    let particules = [];
+    let largeur = 0;
+    let hauteur = 0;
+    const souris = { x: -1000, y: -1000 };
+    const DISTANCE_LIEN = 120;
+    let enTeteVisible = true;
+    function redimensionner() {
+        const ratio = window.devicePixelRatio || 1;
+        largeur = enTete.offsetWidth;
+        hauteur = enTete.offsetHeight;
+        canvas.width = largeur * ratio;
+        canvas.height = hauteur * ratio;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        const nombre = Math.min(Math.floor((largeur * hauteur) / 12000), 90);
+        particules = [];
+        for (let i = 0; i < nombre; i++) {
+            particules.push({
+                x: Math.random() * largeur,
+                y: Math.random() * hauteur,
+                vx: (Math.random() - 0.5) * 0.6,
+                vy: (Math.random() - 0.5) * 0.6,
+            });
+        }
+    }
+    function dessiner() {
+        requestAnimationFrame(dessiner);
+        if (!enTeteVisible)
+            return;
+        ctx.clearRect(0, 0, largeur, hauteur);
+        particules.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > largeur)
+                p.vx *= -1;
+            if (p.y < 0 || p.y > hauteur)
+                p.vy *= -1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.fill();
+            // Lignes entre les particules proches
+            for (let j = i + 1; j < particules.length; j++) {
+                const autre = particules[j];
+                const distance = Math.hypot(p.x - autre.x, p.y - autre.y);
+                if (distance < DISTANCE_LIEN) {
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.25 * (1 - distance / DISTANCE_LIEN)})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(autre.x, autre.y);
+                    ctx.stroke();
+                }
+            }
+            // Lignes vers la souris
+            const distanceSouris = Math.hypot(p.x - souris.x, p.y - souris.y);
+            if (distanceSouris < DISTANCE_LIEN * 1.5) {
+                ctx.strokeStyle = `rgba(199, 125, 255, ${0.6 * (1 - distanceSouris / (DISTANCE_LIEN * 1.5))})`;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(souris.x, souris.y);
+                ctx.stroke();
+            }
+        });
+    }
+    enTete.addEventListener("mousemove", (event) => {
+        const rect = enTete.getBoundingClientRect();
+        souris.x = event.clientX - rect.left;
+        souris.y = event.clientY - rect.top;
+    });
+    enTete.addEventListener("mouseleave", () => {
+        souris.x = -1000;
+        souris.y = -1000;
+    });
+    // On arrête de dessiner quand l'en-tête n'est plus à l'écran
+    if ("IntersectionObserver" in window) {
+        new IntersectionObserver((entrees) => {
+            enTeteVisible = entrees[0].isIntersecting;
+        }).observe(enTete);
+    }
+    window.addEventListener("resize", redimensionner);
+    redimensionner();
+    dessiner();
+}
 const formulaire = document.getElementById("form-contact");
 const champNom = document.getElementById("nom");
 const champPrenom = document.getElementById("prenom");
