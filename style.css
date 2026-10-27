@@ -361,6 +361,26 @@ header nav a.actif::after {
   }
 }
 
+/* Bouton de téléchargement du CV */
+#cv {
+  text-align: center;
+}
+
+#cv .bouton-cv {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 30px;
+  background: #58139a;
+  color: white;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+#cv .bouton-cv:hover {
+  transform: translateY(-3px);
+  background: #3d0d6b;
+}
+
 /* Pas d'animations pour ceux qui les ont désactivées sur leur appareil */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
