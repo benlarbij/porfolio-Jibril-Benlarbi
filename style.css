@@ -366,6 +366,21 @@ header nav a.actif::after {
   text-align: center;
 }
 
+#cv .apercu-cv {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+#cv .apercu-cv:hover {
+  transform: scale(1.02);
+}
+
 #cv .bouton-cv {
   display: inline-block;
   padding: 12px 28px;
