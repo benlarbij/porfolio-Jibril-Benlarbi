@@ -141,8 +141,25 @@
 
 
 <footer>
+  <div class="qr-portfolio">
+    <div id="qr-code" role="img" aria-label="QR code vers le portfolio de Jibril Benlarbi"></div>
+    <p>Scannez pour ouvrir ce portfolio</p>
+  </div>
   <p>© 2026 Jibril Benlarbi</p>
 </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  if (window.QRCode) {
+    new QRCode(document.getElementById("qr-code"), {
+      text: "https://benlarbij.github.io/porfolio-Jibril-Benlarbi/",
+      width: 140,
+      height: 140,
+      colorDark: "#3d0d6b",
+      colorLight: "#ffffff"
+    });
+  }
+</script>
 
 </body>
 </html>
